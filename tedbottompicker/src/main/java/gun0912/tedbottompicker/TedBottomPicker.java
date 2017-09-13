@@ -495,7 +495,7 @@ public class TedBottomPicker extends BottomSheetDialogFragment {
         }
 
         if (builder.titleBackgroundResId > 0) {
-            tv_title.setBackgroundResource(builder.titleBackgroundResId);
+            view_title_container.setBackgroundResource(builder.titleBackgroundResId);
         }
 
     }
