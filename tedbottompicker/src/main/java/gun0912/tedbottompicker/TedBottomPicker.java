@@ -23,6 +23,7 @@ import android.support.annotation.StringRes;
 import android.support.design.widget.BottomSheetBehavior;
 import android.support.design.widget.BottomSheetDialogFragment;
 import android.support.design.widget.CoordinatorLayout;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
@@ -33,6 +34,7 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.HorizontalScrollView;
@@ -54,7 +56,7 @@ import java.util.Locale;
 import gun0912.tedbottompicker.adapter.ImageGalleryAdapter;
 import gun0912.tedbottompicker.util.RealPathUtil;
 
-public class TedBottomPicker extends BottomSheetDialogFragment {
+public class TedBottomPicker extends Fragment {
 
     public static final String TAG = "TedBottomPicker";
     static final int REQ_CODE_CAMERA = 1;
@@ -77,29 +79,7 @@ public class TedBottomPicker extends BottomSheetDialogFragment {
     ArrayList<Uri> tempUriList;
     private Uri cameraImageUri;
     private RecyclerView rc_gallery;
-    private BottomSheetBehavior.BottomSheetCallback mPickerStateChangedListener = null;
-    private BottomSheetBehavior.BottomSheetCallback mBottomSheetBehaviorCallback = new BottomSheetBehavior.BottomSheetCallback() {
-
-
-        @Override
-        public void onStateChanged(@NonNull View bottomSheet, int newState) {
-            if (newState == BottomSheetBehavior.STATE_HIDDEN) {
-                dismissAllowingStateLoss();
-            }
-
-            if(mPickerStateChangedListener != null){
-                mPickerStateChangedListener.onStateChanged(bottomSheet, newState);
-            }
-
-        }
-
-        @Override
-        public void onSlide(@NonNull View bottomSheet, float slideOffset) {
-            if(mPickerStateChangedListener != null){
-                mPickerStateChangedListener.onSlide(bottomSheet, slideOffset);
-            }
-        }
-    };
+    private BottomSheetBehavior.BottomSheetCallback mBottomSheetBehaviorCallback = null;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -133,40 +113,19 @@ public class TedBottomPicker extends BottomSheetDialogFragment {
 
     }
 
-    public void show(FragmentManager fragmentManager) {
+    public void show(FragmentManager fragmentManager, int containerId) {
 
         FragmentTransaction ft = fragmentManager.beginTransaction();
-        ft.add(this, getTag());
+        ft.add(containerId, this, getTag());
         ft.commitAllowingStateLoss();
     }
 
+    @Nullable
     @Override
-    public Dialog onCreateDialog(Bundle savedInstanceState) {
-        return super.onCreateDialog(savedInstanceState);
-    }
+    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        super.onCreateView(inflater, container, savedInstanceState);
 
-    @Override
-    public void onViewCreated(View contentView, @Nullable Bundle savedInstanceState) {
-        super.onViewCreated(contentView, savedInstanceState);
-
-
-    }
-
-    @Override
-    public void setupDialog(Dialog dialog, int style) {
-        super.setupDialog(dialog, style);
         contentView = View.inflate(getContext(), R.layout.tedbottompicker_content_view, null);
-        dialog.setContentView(contentView);
-        CoordinatorLayout.LayoutParams layoutParams =
-                (CoordinatorLayout.LayoutParams) ((View) contentView.getParent()).getLayoutParams();
-        CoordinatorLayout.Behavior behavior = layoutParams.getBehavior();
-        if (behavior != null && behavior instanceof BottomSheetBehavior) {
-            ((BottomSheetBehavior) behavior).setBottomSheetCallback(mBottomSheetBehaviorCallback);
-            if (builder != null && builder.peekHeight > 0) {
-                ((BottomSheetBehavior) behavior).setPeekHeight(builder.peekHeight);
-            }
-
-        }
 
         initView(contentView);
 
@@ -187,7 +146,13 @@ public class TedBottomPicker extends BottomSheetDialogFragment {
 
         setDoneButton();
         checkMultiMode();
+        return contentView;
     }
+
+    public void setBottomSheetBehaviorCallback(BottomSheetBehavior.BottomSheetCallback bottomSheetBehaviorCallback) {
+        this.mBottomSheetBehaviorCallback = bottomSheetBehaviorCallback;
+    }
+
 
     private void setSelectionView() {
 
@@ -231,7 +196,6 @@ public class TedBottomPicker extends BottomSheetDialogFragment {
 
 
         builder.onMultiImageSelectedListener.onImagesSelected(selectedUriList);
-        dismissAllowingStateLoss();
     }
 
     private void checkMultiMode() {
@@ -310,7 +274,6 @@ public class TedBottomPicker extends BottomSheetDialogFragment {
 
         } else {
             builder.onImageSelectedListener.onImageSelected(uri);
-            dismissAllowingStateLoss();
         }
 
     }
@@ -575,15 +538,6 @@ public class TedBottomPicker extends BottomSheetDialogFragment {
 
     }
 
-    public BottomSheetBehavior.BottomSheetCallback getPickerStateChangedListener() {
-        return mPickerStateChangedListener;
-    }
-
-    public void setPickerStateChangedListener(BottomSheetBehavior.BottomSheetCallback mPickerStateChangedListener) {
-        this.mPickerStateChangedListener = mPickerStateChangedListener;
-    }
-
-
     public interface OnMultiImageSelectedListener {
         void onImagesSelected(ArrayList<Uri> uriList);
     }
@@ -618,6 +572,7 @@ public class TedBottomPicker extends BottomSheetDialogFragment {
         public boolean showCamera = true;
         public boolean showGallery = true;
         public int peekHeight = -1;
+        public Boolean isHideable = null;
         public int cameraTileBackgroundResId = R.color.tedbottompicker_camera;
         public int galleryTileBackgroundResId = R.color.tedbottompicker_gallery;
 
@@ -656,6 +611,7 @@ public class TedBottomPicker extends BottomSheetDialogFragment {
             this.cameraTileDrawable = cameraTileDrawable;
             return this;
         }
+
 
         public Builder setGalleryTile(@DrawableRes int galleryTileResId) {
             setGalleryTile(ContextCompat.getDrawable(context, galleryTileResId));
@@ -735,6 +691,11 @@ public class TedBottomPicker extends BottomSheetDialogFragment {
 
         public Builder setSpacing(int spacing) {
             this.spacing = spacing;
+            return this;
+        }
+
+        public Builder setHideable(boolean isHideable) {
+            this.isHideable = isHideable;
             return this;
         }
 

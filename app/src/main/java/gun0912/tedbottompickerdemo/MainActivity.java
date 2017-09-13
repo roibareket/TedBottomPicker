@@ -91,7 +91,7 @@ public class MainActivity extends AppCompatActivity {
                                 .setPeekHeight(1200)
                                 .create();
 
-                        bottomSheetDialogFragment.show(getSupportFragmentManager());
+                        bottomSheetDialogFragment.show(getSupportFragmentManager(), R.id.container);
 
 
                     }
@@ -142,7 +142,7 @@ public class MainActivity extends AppCompatActivity {
                                 .setSelectedUriList(selectedUriList)
                                 .create();
 
-                        bottomSheetDialogFragment.show(getSupportFragmentManager());
+                        bottomSheetDialogFragment.show(getSupportFragmentManager(), R.id.container);
 
 
                     }
