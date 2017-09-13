@@ -77,22 +77,27 @@ public class TedBottomPicker extends BottomSheetDialogFragment {
     ArrayList<Uri> tempUriList;
     private Uri cameraImageUri;
     private RecyclerView rc_gallery;
+    private BottomSheetBehavior.BottomSheetCallback mPickerStateChangedListener = null;
     private BottomSheetBehavior.BottomSheetCallback mBottomSheetBehaviorCallback = new BottomSheetBehavior.BottomSheetCallback() {
 
 
         @Override
         public void onStateChanged(@NonNull View bottomSheet, int newState) {
-            Log.d(TAG, "onStateChanged() newState: " + newState);
             if (newState == BottomSheetBehavior.STATE_HIDDEN) {
                 dismissAllowingStateLoss();
             }
 
+            if(mPickerStateChangedListener != null){
+                mPickerStateChangedListener.onStateChanged(bottomSheet, newState);
+            }
 
         }
 
         @Override
         public void onSlide(@NonNull View bottomSheet, float slideOffset) {
-            Log.d(TAG, "onSlide() slideOffset: " + slideOffset);
+            if(mPickerStateChangedListener != null){
+                mPickerStateChangedListener.onSlide(bottomSheet, slideOffset);
+            }
         }
     };
 
@@ -568,6 +573,14 @@ public class TedBottomPicker extends BottomSheetDialogFragment {
 
         complete(selectedImageUri);
 
+    }
+
+    public BottomSheetBehavior.BottomSheetCallback getPickerStateChangedListener() {
+        return mPickerStateChangedListener;
+    }
+
+    public void setPickerStateChangedListener(BottomSheetBehavior.BottomSheetCallback mPickerStateChangedListener) {
+        this.mPickerStateChangedListener = mPickerStateChangedListener;
     }
 
 
