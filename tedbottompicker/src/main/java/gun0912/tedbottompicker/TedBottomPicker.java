@@ -458,6 +458,8 @@ public class TedBottomPicker extends Fragment {
             return;
         }
 
+        view_title_container.setOnClickListener(builder.titleClickListener);
+
         if (!TextUtils.isEmpty(builder.title)) {
             tv_title.setText(builder.title);
         }
@@ -579,6 +581,7 @@ public class TedBottomPicker extends Fragment {
         public String title;
         public boolean showTitle = true;
         public int titleBackgroundResId;
+        public View.OnClickListener titleClickListener;
 
         public int selectMaxCount = Integer.MAX_VALUE;
         public int selectMinCount = 0;
@@ -731,6 +734,11 @@ public class TedBottomPicker extends Fragment {
 
         public Builder showTitle(boolean showTitle) {
             this.showTitle = showTitle;
+            return this;
+        }
+
+        public Builder setTitleClickListener(View.OnClickListener listener){
+            titleClickListener = listener;
             return this;
         }
 
